@@ -11,7 +11,7 @@ let total = {
 window.addEventListener("load", () => {
 	const params = new URLSearchParams(window.location.search);
 	if (!params.has("username")) {
-		window.location = "/index";
+		window.location = "./index.html";
 		return;
 	}
 
@@ -31,7 +31,7 @@ const fetch_player = (user) => {
 
 const fetch_error = (err) => {
 	alert(`Error: ${err}`);
-	window.location = "/index";
+	window.location = "./index.html";
 }
 
 const parse_user = (res) => {
@@ -52,7 +52,7 @@ const parse_user = (res) => {
 const update_loading_status = () => {
 	const text = total.loading ?
 		`Loading ${total.loaded} matches...` :
-		`Loaded ${total.loaded} matches...`;
+		`Loaded ${total.loaded} matches`;
 	loading_status.innerText = text;
 }
 const get_matches = () => {
