@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+	--background: #0D1317;
+	--foreground: #FFE3DC;
+	--focus: #9AE19D;
+	--radius: 0.4rem;
+}
+
+body {
+	width: 100vw;
+	min-height: 100vh;
+
+	margin: 0;
+	padding: 1rem;
+	box-sizing: border-box;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: stretch;
+	gap: 0.5rem;
+
+	background-color: var(--background);
+}
+
+* {
+	color: var(--foreground);
+	font-family: Inter, Arial, "Helvetica Neue", Helvetica, sans-serif;
+	font-size: 1.2rem;
+}
+
+header {
+	position: sticky;
+	padding: 0.25rem;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	cursor: pointer;
+}
+
+#ranked_img {
+	width: 2rem;
+}
+
+input,
+button {
+	background-color: var(--background);
+	border: 2px solid var(--focus);
+	border-radius: var(--radius);
+	padding: 0.25rem;
+}
+
+.separator {
+	display: flex;
+	align-items: center;
+	text-align: center;
+	margin: 0.5rem 0;
+	font-size: 0.8rem;
+}
+
+.separator::before,
+.separator::after {
+	content: '';
+	flex: 1;
+	border-bottom: 1px solid var(--foreground);
+}
+
+.separator:not(:empty)::before {
+	margin-right: .25rem;
+}
+
+.separator:not(:empty)::after {
+	margin-left: .25rem;
+}
+
+#user,
+.opponent {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+#user_avatar,
+.opponent_avatar {
+	width: 5rem;
+	border-radius: var(--radius);
+}
+
+#username {
+	font-size: 2rem;
+}
+
+#opponents {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.opponent {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.5rem;
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: var(--radius);
+}
+
+.wins {
+	color: #caf0c7;
+}
+
+.losses {
+	color: #eba9be;
+}
