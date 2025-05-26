@@ -7,8 +7,15 @@
 	--radius: 0.4rem;
 }
 
+* {
+	color: var(--foreground);
+	font-family: Inter, Arial, "Helvetica Neue", Helvetica, sans-serif;
+	font-size: 1.2rem;
+}
+
 body {
 	width: 100vw;
+	max-width: 100%;
 	min-height: 100vh;
 
 	margin: 0;
@@ -17,16 +24,10 @@ body {
 
 	display: flex;
 	flex-direction: column;
-	justify-content: stretch;
+	align-items: stretch;
 	gap: 0.5rem;
 
 	background-color: var(--background);
-}
-
-* {
-	color: var(--foreground);
-	font-family: Inter, Arial, "Helvetica Neue", Helvetica, sans-serif;
-	font-size: 1.2rem;
 }
 
 header {
@@ -38,8 +39,13 @@ header {
 	cursor: pointer;
 }
 
-#ranked_img {
+header>img {
 	width: 2rem;
+}
+
+input {
+	max-width: 100%;
+	box-sizing: border-box;
 }
 
 input,
@@ -48,6 +54,13 @@ button {
 	border: 2px solid var(--focus);
 	border-radius: var(--radius);
 	padding: 0.25rem;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+	justify-content: stretch;
+	gap: 0.5rem;
 }
 
 .separator {
@@ -63,6 +76,7 @@ button {
 	content: '';
 	flex: 1;
 	border-bottom: 1px solid var(--foreground);
+	box-sizing: border-box;
 }
 
 .separator:not(:empty)::before {
@@ -79,10 +93,27 @@ button {
 
 #user,
 .opponent {
-	width: 100%;
+	min-width: fit-content;
 	display: flex;
 	align-items: center;
 	gap: 1rem;
+
+	padding: 0.5rem;
+	box-sizing: border-box;
+}
+
+.opponent {
+	background-color: rgba(255, 255, 255, 0.1);
+	border-radius: var(--radius);
+}
+
+#user_identity,
+.opponent_identity {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.25rem;
 }
 
 #user_avatar,
@@ -91,18 +122,39 @@ button {
 	border-radius: var(--radius);
 }
 
-#opponents {
-	display: flex;
-	flex-direction: column;
+#user_stats,
+.opponent_stats {
+	flex-grow: 1;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
 	gap: 0.5rem;
 }
 
-.opponent {
-	width: 100%;
-	box-sizing: border-box;
-	padding: 0.5rem;
-	background-color: rgba(255, 255, 255, 0.1);
-	border-radius: var(--radius);
+#user_stats>span,
+.opponent_stats>span {
+	text-align: center;
+}
+
+@media only screen and (max-width: 450px) {
+
+	#user,
+	.opponent {
+		flex-direction: column;
+	}
+
+	#user_stats,
+	.opponent_stats {
+		display: flex;
+		flex-direction: column;
+		justify-content: stretch;
+	}
+}
+
+#opponents {
+	display: flex;
+	flex-direction: column;
+	justify-content: stretch;
+	gap: 0.5rem;
 }
 
 .wins {
