@@ -220,7 +220,7 @@ const display_opponents = () => {
 			win_time = `${win_minutes}:${win_seconds}`;
 		}
 		if (result.loss_completions > 0) {
-			let loss_average = Math.round(result.win_completions_time / result.win_completions / 1000);
+			let loss_average = Math.round(result.loss_completions_time / result.loss_completions / 1000);
 			let loss_minutes = Math.floor(loss_average / 60),
 				loss_seconds = (loss_average % 60).toString().padStart(2, "0");
 
