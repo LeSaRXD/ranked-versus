@@ -30,8 +30,8 @@ const fetch_player = (user) => {
 }
 
 const fetch_error = (err) => {
-	alert(`Error: ${err}`);
-	window.location = "./index.html";
+	alert("An error occurred! Check console for more info");
+	console.error(err);
 }
 
 const parse_user = (res) => {
@@ -131,12 +131,18 @@ const process_datas = (datas) => {
 			win_completions = 0,
 			loss_completions = 0,
 			win_completions_time = 0,
-			loss_completions_time = 0;
+			loss_completions_time = 0,
+			elo_change = 0;
 
 		for (const match of data.matches) {
 			const won = match.result?.uuid === total.uuid;
 			const drew = match.result?.uuid === null;
 			const completed = !match.forfeited;
+			const elo_delta = match.changes.find((ch) => ch.uuid === total.uuid)?.change;
+			if (elo_delta === undefined) {
+				console.warn("Expected ELO change for user, found:", match.changes);
+				continue;
+			}
 
 			if (won) {
 				wins += 1;
@@ -149,6 +155,7 @@ const process_datas = (datas) => {
 				loss_completions += completed;
 				loss_completions_time += match.result?.time ?? 0;
 			}
+			elo_change += elo_delta;
 		}
 
 		return {
@@ -157,6 +164,7 @@ const process_datas = (datas) => {
 			win_completions, loss_completions,
 			"win_average": Math.round(win_completions_time / win_completions / 1000),
 			"loss_average": Math.round(loss_completions_time / loss_completions / 1000),
+			elo_change,
 		};
 	});
 }
@@ -197,6 +205,18 @@ const display_opponents = (datas) => {
 		const averages = new_card.querySelector(".averages");
 		averages.querySelector(".wins.counter").innerText = win_time;
 		averages.querySelector(".losses.counter").innerText = loss_time;
+
+		const elo_change = new_card.querySelector(".elo_change");
+		if (data.elo_change > 0) {
+			elo_change.classList.add("wins");
+			elo_change.innerText = `+${data.elo_change} ELO`;
+		} else if (data.elo_change < 0) {
+			elo_change.classList.add("losses");
+			elo_change.innerText = `${data.elo_change} ELO`;
+		} else {
+			elo_change.classList.add("draws");
+			elo_change.innerText = `${data.elo_change} ELO`;
+		}
 
 		opponents.appendChild(new_card);
 	}
