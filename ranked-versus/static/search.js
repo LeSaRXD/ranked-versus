@@ -45,6 +45,7 @@ const parse_user = (res) => {
 	total.uuid = player.uuid;
 	username.innerText = player.nickname;
 	user_avatar.src = `https://mineskin.eu/helm/${total.uuid}`;
+	user_elo.innerText = `${player.eloRate} ELO`;
 
 	get_matches();
 }
@@ -114,15 +115,16 @@ const finished_loading = () => {
 			};
 	}
 
-	const datas = [...Object.values(opponent_datas)].sort((d1, d2) => d2.matches.length - d1.matches.length);
+	const sort_func = (data1, data2) => (data2.matches.length - data1.matches.length);
+
+	const datas = [...Object.values(opponent_datas)].sort(sort_func);
 
 	const processed = process_datas(datas);
 	display_opponents(processed);
 }
 
 const process_datas = (datas) => {
-	const result = [];
-	for (const data of datas) {
+	return datas.map((data) => {
 		let wins = 0,
 			draws = 0,
 			losses = 0,
@@ -149,16 +151,14 @@ const process_datas = (datas) => {
 			}
 		}
 
-		result.push({
+		return {
 			"opponent": data.opponent,
 			wins, draws, losses,
 			win_completions, loss_completions,
 			"win_average": Math.round(win_completions_time / win_completions / 1000),
 			"loss_average": Math.round(loss_completions_time / loss_completions / 1000),
-		})
-	}
-
-	return result;
+		};
+	});
 }
 
 const display_opponents = (datas) => {
@@ -185,12 +185,14 @@ const display_opponents = (datas) => {
 		const new_card = opponent_card.cloneNode(true);
 
 		new_card.querySelector(".opponent_avatar").src = `https://mineskin.eu/helm/${data.opponent.uuid}`;
-		new_card.querySelector(".opponent_username").innerText = data.opponent.nickname;
+		const opp_name = new_card.querySelector(".opponent_username");
+		opp_name.innerText = data.opponent.nickname;
+		opp_name.href = `./search.html?username=${data.opponent.nickname}`;
 
-		const wdl = new_card.querySelector(".win_draw_loss");
-		wdl.querySelector(".wins.counter").innerText = data.wins;
-		wdl.querySelector(".draws.counter").innerText = data.draws;
-		wdl.querySelector(".losses.counter").innerText = data.losses;
+		const win_draw_loss = new_card.querySelector(".win_draw_loss");
+		win_draw_loss.querySelector(".wins.counter").innerText = data.wins;
+		win_draw_loss.querySelector(".draws.counter").innerText = data.draws;
+		win_draw_loss.querySelector(".losses.counter").innerText = data.losses;
 
 		const averages = new_card.querySelector(".averages");
 		averages.querySelector(".wins.counter").innerText = win_time;

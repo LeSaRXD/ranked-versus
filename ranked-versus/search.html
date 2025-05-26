@@ -2,27 +2,28 @@
 <html>
 	<head>
 		<title>MCSR Ranked Versus Lookup</title>
-		<link rel="stylesheet" href="./styles.css">
+		<link rel="stylesheet" href="./static/styles.css">
 	</head>
 	<body>
 		<header>
-			<img id="ranked_img" src="./ranked.png">
+			<img id="ranked_img" src="./static/ranked.png">
 			MCSR Ranked Versus Lookup
 		</header>
 
 		<div id="user">
-			<img id="user_avatar" src="./loading.gif">
+			<img id="user_avatar" src="./static/loading.gif">
 			<span id="username">Loading...</span>
+			<span id="user_elo">--</span>
 		</div>
 
 		<div id="loading_status" class="separator">
-			Loading 0 matches...
+			Loading profile...
 		</div>
 
 		<div id="opponents">
 			<div class="opponent">
-				<img class="opponent_avatar" src="./loading.gif">
-				<span class="opponent_username">Loading...</span>
+				<img class="opponent_avatar" src="./static/loading.gif">
+				<a href="#" class="opponent_username">Loading...</a>
 				<span class="win_draw_loss">
 					<span class="wins text">W</span>/<span class="draws text">D</span>/<span class="losses text">L</span>: 
 					<span class="wins counter">0</span>/<span class="draws counter">0</span>/<span class="losses counter">0</span>
@@ -32,7 +33,7 @@
 			</div>
 		</div>
 
-		<script src="./main.js"></script>
-		<script src="./search.js"></script>
+		<script src="./static/main.js"></script>
+		<script src="./static/search.js"></script>
 	</body>
 </html>

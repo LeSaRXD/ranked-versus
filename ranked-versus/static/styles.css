@@ -73,6 +73,10 @@ button {
 	margin-left: .25rem;
 }
 
+#user * {
+	font-size: 2rem;
+}
+
 #user,
 .opponent {
 	width: 100%;
@@ -85,10 +89,6 @@ button {
 .opponent_avatar {
 	width: 5rem;
 	border-radius: var(--radius);
-}
-
-#username {
-	font-size: 2rem;
 }
 
 #opponents {
