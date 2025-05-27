@@ -30,6 +30,11 @@ const fetch_player = (user) => {
 }
 
 const fetch_error = (err) => {
+	if (err === "User is not exists.") {
+		alert("User does not exist! Please try a different username");
+		window.location = "./index.html";
+		return;
+	}
 	alert("An error occurred! Check console for more info");
 	console.error(err);
 }
@@ -56,7 +61,7 @@ const display_player = (player) => {
 }
 
 const load_cache = () => {
-	const CURRENT_VERSION = "1";
+	const CURRENT_VERSION = "2";
 	const prev_version = localStorage.getItem("version");
 
 	if (prev_version !== CURRENT_VERSION) {
@@ -173,14 +178,18 @@ const process_datas = (datas) => {
 			result.total += 1;
 			if (won) {
 				result.wins += 1;
-				result.win_completions += completed;
-				result.win_completions_time += match.result?.time ?? 0;
+				if (completed) {
+					result.win_completions += 1;
+					result.win_completions_time += match.result?.time ?? 0;
+				}
 			} else if (drew) {
 				result.draws += 1;
 			} else {
 				result.losses += 1;
-				result.loss_completions += completed;
-				result.loss_completions_time += match.result?.time ?? 0;
+				if (completed) {
+					result.loss_completions += 1;
+					result.loss_completions_time += match.result?.time ?? 0;
+				}
 			}
 			result.elo_change += elo_change;
 
