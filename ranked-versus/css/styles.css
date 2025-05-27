@@ -5,6 +5,8 @@
 	--foreground: #FFE3DC;
 	--focus: #9AE19D;
 	--radius: 0.4rem;
+	--wins: #caf0c7;
+	--losses: #eba9be;
 }
 
 * {
@@ -16,6 +18,7 @@
 body {
 	width: 100vw;
 	max-width: 100%;
+	min-width: 150px;
 	min-height: 100vh;
 
 	margin: 0;
@@ -93,7 +96,6 @@ form {
 
 #user,
 .opponent {
-	min-width: fit-content;
 	display: flex;
 	align-items: center;
 	gap: 1rem;
@@ -107,24 +109,21 @@ form {
 	border-radius: var(--radius);
 }
 
-#user_identity,
-.opponent_identity {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.5rem;
-	padding: 0.25rem;
-}
-
 #user_avatar,
 .opponent_avatar {
 	width: 5rem;
 	border-radius: var(--radius);
 }
 
+#username,
+.opponent_username {
+	min-width: 8rem;
+}
+
 #user_stats,
 .opponent_stats {
 	flex-grow: 1;
+
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
 	gap: 0.5rem;
@@ -135,11 +134,18 @@ form {
 	text-align: center;
 }
 
-@media only screen and (max-width: 450px) {
+@media only screen and (max-width: 600px) {
 
 	#user,
 	.opponent {
 		flex-direction: column;
+		min-width: 130px;
+	}
+
+	#username,
+	.opponent_username {
+		min-width: unset;
+		text-align: center;
 	}
 
 	#user_stats,
@@ -158,9 +164,9 @@ form {
 }
 
 .wins {
-	color: #caf0c7;
+	color: var(--wins);
 }
 
 .losses {
-	color: #eba9be;
+	color: var(--losses);
 }
