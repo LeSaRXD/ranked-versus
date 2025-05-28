@@ -1,5 +1,13 @@
 const MATCHES_PER_LOAD = 100;
-let total = {
+
+const Filter = {
+	EQUALS: 0,
+	LESS_EQUAL: -1,
+	LESS: -2,
+	GREATER_EQUAL: 1,
+	GREATER: 2,
+};
+const total = {
 	uuid: null,
 	loading: true,
 	num_loaded: 0,
@@ -7,6 +15,14 @@ let total = {
 	after: 0,
 	matches: [],
 	results: {},
+	sort_by: [
+		["total", true],
+		["win_average", false],
+	],
+	filter_by: [
+		["total", Filter.GREATER, 1],
+		// ["win_average", Filter.LESS_EQUAL, 12 * 60],
+	]
 };
 
 window.addEventListener("load", () => {
@@ -197,12 +213,16 @@ const process_datas = (datas) => {
 				total.after = match.id;
 		}
 	}
-
-	const entries = Object.entries(total.results);
-	entries.sort((d1, d2) => d2[1].total - d1[1].total);
-	total.results = Object.fromEntries(entries);
-
 	save_cache();
+
+	for (const result of Object.values(total.results)) {
+		result.win_average = result.win_completions > 0 ?
+			Math.round(result.win_completions_time / result.win_completions / 1000)
+			: null;
+		result.loss_average = result.loss_completions > 0 ?
+			Math.round(result.loss_completions_time / result.loss_completions / 1000)
+			: null;
+	}
 }
 
 const save_cache = () => {
@@ -216,27 +236,30 @@ const display_opponents = () => {
 		console.error("Cound not find opponent card node, exiting...");
 		return;
 	}
-	opponents.removeChild(opponent_card);
+	opponents.replaceChildren(opponent_card);
+	opponent_card.style.display = "none"
 
-	for (const result of Object.values(total.results)) {
+	let results = filter_results(Object.values(total.results));
+	results = sort_results(results);
+
+	for (const result of results) {
 		let win_time = "--", loss_time = "--";
 
 		if (result.win_completions > 0) {
-			let win_average = Math.round(result.win_completions_time / result.win_completions / 1000);
-			let win_minutes = Math.floor(win_average / 60),
-				win_seconds = (win_average % 60).toString().padStart(2, "0");
+			let win_minutes = Math.floor(result.win_average / 60),
+				win_seconds = (result.win_average % 60).toString().padStart(2, "0");
 
 			win_time = `${win_minutes}:${win_seconds}`;
 		}
 		if (result.loss_completions > 0) {
-			let loss_average = Math.round(result.loss_completions_time / result.loss_completions / 1000);
-			let loss_minutes = Math.floor(loss_average / 60),
-				loss_seconds = (loss_average % 60).toString().padStart(2, "0");
+			let loss_minutes = Math.floor(result.loss_average / 60),
+				loss_seconds = (result.loss_average % 60).toString().padStart(2, "0");
 
 			loss_time = `${loss_minutes}:${loss_seconds}`;
 		}
 
 		const new_card = opponent_card.cloneNode(true);
+		new_card.style.display = "";
 
 		new_card.querySelector(".opponent_avatar").src = `https://mineskin.eu/helm/${result.opponent.uuid}`;
 		const opp_name = new_card.querySelector(".opponent_username");
@@ -266,4 +289,76 @@ const display_opponents = () => {
 
 		opponents.appendChild(new_card);
 	}
+}
+
+const filter_results = (result_values) => {
+	return result_values.filter((res) => {
+		filters: for (const [id, cmp, value] of total.filter_by) {
+			if (!res.hasOwnProperty(id)) {
+				console.warn(`Expected property ${id}, found result: `, res);
+				continue;
+			}
+
+			if (res[id] === null)
+				return false;
+
+			switch (cmp) {
+				case Filter.EQUALS:
+					if (res[id] == value)
+						continue filters;
+					break;
+
+				case Filter.LESS:
+					if (res[id] < value)
+						continue filters;
+					break;
+
+				case Filter.LESS_EQUAL:
+					if (res[id] <= value)
+						continue filters;
+					break;
+
+				case Filter.GREATER:
+					if (res[id] > value)
+						continue filters;
+					break;
+
+				case Filter.GREATER_EQUAL:
+					if (res[id] >= value)
+						continue filters;
+					break;
+
+				default:
+					console.warn(`Filter operation ${cmp} doesn't exist!`);
+					continue filters;
+			}
+
+			return false;
+		}
+
+		return true;
+	})
+}
+
+const sort_results = (result_values) => {
+	return result_values.sort((r1, r2) => {
+		for (const [id, reverse] of total.sort_by) {
+			if (!r1.hasOwnProperty(id) || !r2.hasOwnProperty(id)) {
+				console.warn(`Expected property ${id}, found results: `, r1, r2);
+				continue;
+			}
+
+			const v1 = r1[id], v2 = r2[id];
+
+			if (v1 === v2)
+				continue;
+			if (v1 === null)
+				return 1;
+			if (v2 === null)
+				return -1;
+
+			return (v1 - v2) * (reverse ? -1 : 1);
+		}
+		return 0;
+	});
 }
