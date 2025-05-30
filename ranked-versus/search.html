@@ -23,6 +23,44 @@
 			Loading profile...
 		</div>
 
+		<div id="sort_filter">
+			<div id="sort_wrapper">
+				<div id="sort_direction"></div>
+				<select id="sort_select">
+					<option value="total" selected="selected">Total games</option>
+					<option value="wins">Wins</option>
+					<option value="win_completions">Win completions</option>
+					<option value="losses">Losses</option>
+					<option value="loss_completions">Loss completions</option>
+					<option value="draws">Draws</option>
+					<option value="elo_change">ELO change</option>
+					<option value="win_average">Win average</option>
+					<option value="loss_average">Loss average</option>
+				</select>
+			</div>
+			<div id="filter_wrapper">
+				<select id="filter_select_id">
+					<option value="total" selected="selected">Total games</option>
+					<option value="wins">Wins</option>
+					<option value="win_completions">Win completions</option>
+					<option value="losses">Losses</option>
+					<option value="loss_completions">Loss completions</option>
+					<option value="draws">Draws</option>
+					<option value="elo_change">ELO change</option>
+					<option value="win_average">Win average</option>
+					<option value="loss_average">Loss average</option>
+				</select>
+				<select id="filter_select_cmp">
+					<option value="equal" selected="selected">=</option>
+					<option value="greater">&gt;</option>
+					<option value="greater_equal" selected="selected">&ge;</option>
+					<option value="less">&lt;</option>
+					<option value="less_equal">&le;</option>
+				</select>
+				<input id="filter_select_value" type="number" value="1">
+			</div>
+		</div>
+
 		<div id="opponents">
 			<div class="opponent">
 				<img class="opponent_avatar" src="./static/loading.gif">

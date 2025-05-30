@@ -1,12 +1,28 @@
 const MATCHES_PER_LOAD = 100;
 
 const Filter = {
-	EQUALS: 0,
+	EQUAL: 0,
 	LESS_EQUAL: -1,
 	LESS: -2,
 	GREATER_EQUAL: 1,
 	GREATER: 2,
+	from_str: (value) => {
+		switch (value) {
+			case "equal":
+				return Filter.EQUAL;
+			case "less_equal":
+				return Filter.LESS_EQUAL;
+			case "less":
+				return Filter.LESS;
+			case "greater_equal":
+				return Filter.GREATER_EQUAL;
+			case "greater":
+				return Filter.GREATER;
+		}
+		return undefined;
+	}
 };
+
 const total = {
 	uuid: null,
 	loading: true,
@@ -17,11 +33,10 @@ const total = {
 	results: {},
 	sort_by: [
 		["total", true],
-		["win_average", false],
+		["total", true],
 	],
 	filter_by: [
 		["total", Filter.GREATER, 1],
-		// ["win_average", Filter.LESS_EQUAL, 12 * 60],
 	]
 };
 
@@ -31,6 +46,16 @@ window.addEventListener("load", () => {
 		window.location = "./index.html";
 		return;
 	}
+
+	opponent_card = opponents.children[0];
+	opponents.replaceChildren();
+	opponent_card.style.display = "";
+
+	sort_select.addEventListener("change", on_sort_change);
+	sort_direction.addEventListener("click", on_sort_direction_change);
+	filter_select_id.addEventListener("change", on_filter_change);
+	filter_select_cmp.addEventListener("change", on_filter_change);
+	filter_select_value.addEventListener("change", on_filter_change);
 
 	const username = params.get("username");
 	fetch_player(username);
@@ -230,14 +255,13 @@ const save_cache = () => {
 	localStorage.setItem(`results_${total.uuid}`, JSON.stringify(total.results));
 }
 
+let opponent_card = undefined;
 const display_opponents = () => {
-	const opponent_card = opponents.children[0];
-	if (opponent_card == undefined) {
+	if (opponent_card === undefined) {
 		console.error("Cound not find opponent card node, exiting...");
 		return;
 	}
-	opponents.replaceChildren(opponent_card);
-	opponent_card.style.display = "none"
+	opponents.replaceChildren();
 
 	let results = filter_results(Object.values(total.results));
 	results = sort_results(results);
@@ -259,7 +283,6 @@ const display_opponents = () => {
 		}
 
 		const new_card = opponent_card.cloneNode(true);
-		new_card.style.display = "";
 
 		new_card.querySelector(".opponent_avatar").src = `https://mineskin.eu/helm/${result.opponent.uuid}`;
 		const opp_name = new_card.querySelector(".opponent_username");
@@ -303,7 +326,7 @@ const filter_results = (result_values) => {
 				return false;
 
 			switch (cmp) {
-				case Filter.EQUALS:
+				case Filter.EQUAL:
 					if (res[id] == value)
 						continue filters;
 					break;
@@ -361,4 +384,48 @@ const sort_results = (result_values) => {
 		}
 		return 0;
 	});
+}
+
+const on_filter_change = () => {
+	const filter_by = filter_select_id.value;
+	if (filter_by === undefined)
+		return;
+
+	let filter_cmp = filter_select_cmp.value;
+	if (filter_cmp === undefined)
+		return;
+
+	filter_cmp = Filter.from_str(filter_cmp);
+	if (filter_cmp === undefined)
+		return;
+
+	let filter_value = filter_select_value.value;
+	if (filter_value === undefined)
+		return;
+
+	filter_value = parseInt(filter_value);
+	if (isNaN(filter_value)) {
+		alert("Invalid filter value!");
+		filter_select_value.value = "1";
+		filter_value = 1;
+	}
+
+	total.filter_by[0] = [filter_by, filter_cmp, filter_value];
+	display_opponents();
+}
+
+const on_sort_change = () => {
+	const sort_by = sort_select.value;
+	if (sort_by === undefined)
+		return;
+
+	total.sort_by[0][0] = sort_by;
+	display_opponents();
+}
+const on_sort_direction_change = () => {
+	const dir = !total.sort_by[0][1];
+	total.sort_by[0][1] = dir;
+	sort_direction.style.transform = dir ? "" : "scale(1, -1)";
+
+	display_opponents();
 }
