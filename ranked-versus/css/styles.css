@@ -9,6 +9,7 @@
 	--losses: #eba9be;
 	--gap: 0.5rem;
 	--padding: 0.25rem;
+	--transparent-bg: rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -187,13 +188,35 @@ form {
 }
 
 .opponent {
-	background-color: rgba(255, 255, 255, 0.1);
+	position: relative;
+	background-color: var(--transparent-bg);
 	border-radius: var(--radius);
+}
+
+.opponent_link {
+	position: absolute;
+	right: calc(2 * var(--padding));
+	top: calc(2 * var(--padding));
+
+	width: 1.5rem;
+	aspect-ratio: 1;
+
+	box-sizing: border-box;
+	padding: var(--padding);
+	border-radius: var(--radius);
+	background-color: var(--transparent-bg);
+	cursor: pointer;
+
+	background-image: url("../static/link.png");
+	background-size: cover;
+	background-origin: content-box;
+	background-repeat: no-repeat;
 }
 
 #user_avatar,
 .opponent_avatar {
 	width: 5rem;
+	aspect-ratio: 1;
 	border-radius: var(--radius);
 }
 

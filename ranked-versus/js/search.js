@@ -25,11 +25,12 @@ const Filter = {
 
 const total = {
 	uuid: null,
+	nickname: null,
 	loading: true,
 	num_loaded: 0,
 	before: null,
 	after: 0,
-	matches: [],
+	datas: {},
 	results: {},
 	sort_by: [
 		["total", true],
@@ -96,6 +97,7 @@ const parse_user = (res) => {
 
 const display_player = (player) => {
 	total.uuid = player.uuid;
+	total.nickname = player.nickname;
 	username.innerText = player.nickname;
 	user_avatar.src = `https://mineskin.eu/helm/${player.uuid}`;
 	user_elo.innerText = `${player.eloRate} ELO`;
@@ -111,7 +113,9 @@ const load_cache = () => {
 		return;
 	}
 
-	total.after = localStorage.getItem(`after_${total.uuid}`) ?? "0";
+	total.after = parseInt(localStorage.getItem(`after_${total.uuid}`) ?? "0");
+	if (isNaN(total.after))
+		total.after = 0;
 	total.results = JSON.parse(localStorage.getItem(`results_${total.uuid}`) ?? "{}");
 	total.num_loaded = Object.values(total.results).reduce((partial, curr) => partial + curr.total, 0);
 }
@@ -139,19 +143,39 @@ const got_matches = (res) => {
 	if (res.status === "error")
 		return fetch_error(res.data);
 
-	const matches = res.data;
-	if (matches === undefined)
+	const new_matches = res.data;
+	if (new_matches === undefined)
 		return fetch_error("Response data is null");
 
-	if (!(matches instanceof Array))
+	if (!(new_matches instanceof Array))
 		return fetch_error("Response has wrong type");
 
-	total.num_loaded += matches.length - MATCHES_PER_LOAD;
-	if (matches.length > 0) {
-		total.before = matches[matches.length - 1].id;
-		total.matches.push(...matches);
+	total.num_loaded -= MATCHES_PER_LOAD;
+
+	for (const match of new_matches) {
+		const opponent = match.players.find((o) => o.uuid != total.uuid);
+		if (opponent === undefined || opponent.uuid === undefined) {
+			console.warn("Could not find opponent in match", match);
+			continue;
+		}
+		match.curr_opponent = opponent;
+
+		total.num_loaded += 1;
+
+		if (opponent.uuid in total.datas) {
+			total.datas[opponent.uuid].matches.push(match);
+			total.datas[opponent.uuid].opponent = opponent;
+		} else
+			total.datas[opponent.uuid] = {
+				opponent,
+				matches: [match],
+			};
+
+		if (total.before === null || total.before > match.id)
+			total.before = match.id;
 	}
-	if (matches.length >= MATCHES_PER_LOAD)
+
+	if (new_matches.length >= MATCHES_PER_LOAD)
 		get_matches();
 	else
 		finished_loading();
@@ -161,35 +185,12 @@ const got_matches = (res) => {
 
 const finished_loading = () => {
 	total.loading = false;
-
-	let opponent_datas = {};
-	for (const match of total.matches) {
-		if (!(match.players instanceof Array)) {
-			console.warn("Expected array of players, got", match.players);
-			continue;
-		}
-
-		const opponent = match.players.find((other) => other.uuid != total.uuid);
-		if (opponent === undefined) {
-			console.warn("Expected players other than current, got", match.players);
-			continue;
-		}
-
-		if (opponent.uuid in opponent_datas)
-			opponent_datas[opponent.uuid].matches.push(match);
-		else
-			opponent_datas[opponent.uuid] = {
-				opponent,
-				matches: [match]
-			};
-	}
-
-	process_datas(opponent_datas);
+	process_datas();
 	display_opponents();
 }
 
-const process_datas = (datas) => {
-	for (const [opp_uuid, data] of Object.entries(datas)) {
+const process_datas = () => {
+	for (const [opp_uuid, data] of Object.entries(total.datas)) {
 		if (!(opp_uuid in total.results)) {
 			total.results[opp_uuid] = {
 				total: 0,
@@ -309,6 +310,8 @@ const display_opponents = () => {
 			elo_change.classList.add("draws");
 			elo_change.innerText = `${result.elo_change} ELO`;
 		}
+
+		new_card.querySelector(".opponent_link").href = `https://mcsrranked.com/stats/${total.nickname}/vs/${result.opponent.nickname}`;
 
 		opponents.appendChild(new_card);
 	}
