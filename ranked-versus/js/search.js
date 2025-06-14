@@ -63,6 +63,7 @@ window.addEventListener("load", () => {
 	filter_select_cmp.addEventListener("change", on_filter_change);
 	filter_select_value.addEventListener("change", on_filter_change);
 
+	load_url(params);
 	const username = params.get("username");
 	fetch_player(username);
 });
@@ -390,6 +391,78 @@ const sort_results = (result_values) => {
 	});
 }
 
+const
+	FILTER_BY_PARAM = "fb",
+	FILTER_VALUE_PARAM = "fv",
+	FILTER_CMP_PARAM = "fc",
+	SORT_BY_PARAM = "sb",
+	SORT_DIR_PARAM = "sd";
+
+const update_url = (param, value) => {
+	let params = new URLSearchParams(window.location.search);
+	params.set(param, value);
+	history.replaceState(null, null, `?${params.toString()}`);
+}
+
+const load_url = (params) => {
+	const id_to_index = (value) => {
+		return [
+			"total",
+			"wins",
+			"win_completions",
+			"losses",
+			"loss_completions",
+			"draws",
+			"elo_change",
+			"win_average",
+			"loss_average",
+		].findIndex((v) => v == value);
+	}
+	const cmp_to_index = (value) => {
+		return [
+			3,
+			4,
+			0,
+			2,
+			1,
+		][value + 2];
+	}
+
+	if (params.has(FILTER_BY_PARAM)) {
+		const val = params.get(FILTER_BY_PARAM);
+		total.filter_by[0][0] = val;
+		filter_select_id.selectedIndex = id_to_index(val);
+	}
+
+	if (params.has(FILTER_CMP_PARAM)) {
+		let val = parseInt(params.get(FILTER_CMP_PARAM));
+		val = isNaN(val) ? 1 : val;
+		total.filter_by[0][1] = val;
+		filter_select_cmp.selectedIndex = cmp_to_index(val);
+	}
+
+	if (params.has(FILTER_VALUE_PARAM)) {
+		let val = parseInt(params.get(FILTER_VALUE_PARAM));
+		val = isNaN(val) ? 1 : val;
+		total.filter_by[0][2] = val;
+		filter_select_value.value = val;
+	}
+
+	if (params.has(SORT_BY_PARAM)) {
+		const val = params.get(SORT_BY_PARAM);
+		total.sort_by[0][0] = val;
+		sort_select.selectedIndex = id_to_index(val);
+	}
+
+	if (params.has(SORT_DIR_PARAM)) {
+		const val = params.get(SORT_DIR_PARAM) == "1";
+		total.sort_by[0][1] = val;
+		sort_direction.style.transform = val ? "" : "scale(1, -1)";
+	}
+
+	console.log("Loaded", total.filter_by[0], total.sort_by[0]);
+}
+
 const on_filter_change = () => {
 	const filter_by = filter_select_id.value;
 	if (filter_by === undefined)
@@ -414,6 +487,10 @@ const on_filter_change = () => {
 		filter_value = 1;
 	}
 
+	update_url(FILTER_BY_PARAM, filter_by);
+	update_url(FILTER_CMP_PARAM, filter_cmp);
+	update_url(FILTER_VALUE_PARAM, filter_value);
+
 	total.filter_by[0] = [filter_by, filter_cmp, filter_value];
 	display_opponents();
 }
@@ -423,6 +500,8 @@ const on_sort_change = () => {
 	if (sort_by === undefined)
 		return;
 
+	update_url(SORT_BY_PARAM, sort_by);
+
 	total.sort_by[0][0] = sort_by;
 	display_opponents();
 }
@@ -430,6 +509,8 @@ const on_sort_direction_change = () => {
 	const dir = !total.sort_by[0][1];
 	total.sort_by[0][1] = dir;
 	sort_direction.style.transform = dir ? "" : "scale(1, -1)";
+
+	update_url(SORT_DIR_PARAM, +dir);
 
 	display_opponents();
 }
