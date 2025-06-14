@@ -7,19 +7,13 @@ const Filter = {
 	GREATER_EQUAL: 1,
 	GREATER: 2,
 	from_str: (value) => {
-		switch (value) {
-			case "equal":
-				return Filter.EQUAL;
-			case "less_equal":
-				return Filter.LESS_EQUAL;
-			case "less":
-				return Filter.LESS;
-			case "greater_equal":
-				return Filter.GREATER_EQUAL;
-			case "greater":
-				return Filter.GREATER;
-		}
-		return undefined;
+		return {
+			"equal": Filter.EQUAL,
+			"less_equal": Filter.LESS_EQUAL,
+			"less": Filter.LESS,
+			"greater_equal": Filter.GREATER_EQUAL,
+			"greater": Filter.GREATER,
+		}[value] ?? undefined;
 	}
 };
 
@@ -41,6 +35,13 @@ const total = {
 	]
 };
 
+const time_to_string = (time) => {
+	time = Math.floor(time);
+	let minutes = Math.floor(time / 60),
+		seconds = (time % 60).toString().padStart(2, "0");
+	return `${minutes}:${seconds}`;
+}
+
 window.addEventListener("load", () => {
 	const params = new URLSearchParams(window.location.search);
 	if (!params.has("username")) {
@@ -48,9 +49,13 @@ window.addEventListener("load", () => {
 		return;
 	}
 
-	opponent_card = opponents.children[0];
+	opponent_card_node = opponents.children[0];
 	opponents.replaceChildren();
-	opponent_card.style.display = "";
+	opponent_card_node.style.display = "";
+
+	const opponent_matches = opponent_card_node.querySelector(".opponent_matches");
+	opponent_match_node = opponent_matches.children[0];
+	opponent_matches.replaceChildren();
 
 	sort_select.addEventListener("change", on_sort_change);
 	sort_direction.addEventListener("click", on_sort_direction_change);
@@ -128,14 +133,14 @@ const update_loading_status = () => {
 }
 
 const get_matches = () => {
-	let api_url = `https://api.mcsrranked.com/users/${total.uuid}/matches?count=${MATCHES_PER_LOAD}&excludedecay=true&type=2`;
+	let matches_url = `https://api.mcsrranked.com/users/${total.uuid}/matches?count=${MATCHES_PER_LOAD}&excludedecay=true&type=2`;
 	if (total.before !== null)
-		api_url += `&before=${total.before}`;
+		matches_url += `&before=${total.before}`;
 	if (total.after !== null)
-		api_url += `&after=${total.after}`;
+		matches_url += `&after=${total.after}`;
 
 	total.num_loaded += MATCHES_PER_LOAD;
-	fetch_json(api_url, got_matches);
+	fetch_json(matches_url, got_matches);
 	update_loading_status();
 }
 
@@ -256,9 +261,9 @@ const save_cache = () => {
 	localStorage.setItem(`results_${total.uuid}`, JSON.stringify(total.results));
 }
 
-let opponent_card = undefined;
+let opponent_card_node = undefined;
 const display_opponents = () => {
-	if (opponent_card === undefined) {
+	if (opponent_card_node === undefined) {
 		console.error("Cound not find opponent card node, exiting...");
 		return;
 	}
@@ -267,39 +272,31 @@ const display_opponents = () => {
 	let results = filter_results(Object.values(total.results));
 	results = sort_results(results);
 
-	for (const result of results) {
+	const opponent_nodes = results.map((result) => {
 		let win_time = "--", loss_time = "--";
 
-		if (result.win_completions > 0) {
-			let win_minutes = Math.floor(result.win_average / 60),
-				win_seconds = (result.win_average % 60).toString().padStart(2, "0");
+		if (result.win_completions > 0)
+			win_time = time_to_string(result.win_average);
+		if (result.loss_completions > 0)
+			loss_time = time_to_string(result.loss_average);
 
-			win_time = `${win_minutes}:${win_seconds}`;
-		}
-		if (result.loss_completions > 0) {
-			let loss_minutes = Math.floor(result.loss_average / 60),
-				loss_seconds = (result.loss_average % 60).toString().padStart(2, "0");
+		const new_card_node = opponent_card_node.cloneNode(true);
 
-			loss_time = `${loss_minutes}:${loss_seconds}`;
-		}
-
-		const new_card = opponent_card.cloneNode(true);
-
-		new_card.querySelector(".opponent_avatar").src = `https://mineskin.eu/helm/${result.opponent.uuid}`;
-		const opp_name = new_card.querySelector(".opponent_username");
+		new_card_node.querySelector(".opponent_avatar").src = `https://mineskin.eu/helm/${result.opponent.uuid}`;
+		const opp_name = new_card_node.querySelector(".opponent_username");
 		opp_name.innerText = result.opponent.nickname;
 		opp_name.href = `./search.html?username=${result.opponent.nickname}`;
 
-		const win_draw_loss = new_card.querySelector(".win_draw_loss");
+		const win_draw_loss = new_card_node.querySelector(".win_draw_loss");
 		win_draw_loss.querySelector(".wins.counter").innerText = result.wins;
 		win_draw_loss.querySelector(".draws.counter").innerText = result.draws;
 		win_draw_loss.querySelector(".losses.counter").innerText = result.losses;
 
-		const averages = new_card.querySelector(".averages");
+		const averages = new_card_node.querySelector(".averages");
 		averages.querySelector(".wins.counter").innerText = win_time;
 		averages.querySelector(".losses.counter").innerText = loss_time;
 
-		const elo_change = new_card.querySelector(".elo_change");
+		const elo_change = new_card_node.querySelector(".elo_change");
 		if (result.elo_change > 0) {
 			elo_change.classList.add("wins");
 			elo_change.innerText = `+${result.elo_change} ELO`;
@@ -311,10 +308,14 @@ const display_opponents = () => {
 			elo_change.innerText = `${result.elo_change} ELO`;
 		}
 
-		new_card.querySelector(".opponent_link").href = `https://mcsrranked.com/stats/${total.nickname}/vs/${result.opponent.nickname}`;
+		new_card_node.querySelector(".opponent_link").href = `https://mcsrranked.com/stats/${total.nickname}/vs/${result.opponent.nickname}`;
 
-		opponents.appendChild(new_card);
-	}
+		new_card_node.querySelector(".opponent_expand").addEventListener("click", on_opponent_expand.bind(undefined, result.opponent.nickname));
+
+		return new_card_node;
+	});
+
+	opponents.replaceChildren(...opponent_nodes);
 }
 
 const filter_results = (result_values) => {
@@ -431,4 +432,48 @@ const on_sort_direction_change = () => {
 	sort_direction.style.transform = dir ? "" : "scale(1, -1)";
 
 	display_opponents();
+}
+
+let opponent_match_node = undefined;
+const on_opponent_expand = (opp_nickname, e) => {
+	const opponent_matches = e.target.parentElement.parentElement.querySelector(".opponent_matches");
+	if (opponent_matches.style.display === "none") {
+		opponent_matches.style.display = "";
+		e.target.classList.add("expanded");
+	} else {
+		opponent_matches.style.display = "none";
+		e.target.classList.remove("expanded");
+	}
+
+	const versus_url = `https://api.mcsrranked.com/users/${total.nickname}/versus/${opp_nickname}/matches?count=100&type=2`;
+	fetch_json(versus_url, on_opponent_expand_response.bind(undefined, opponent_matches));
+}
+const on_opponent_expand_response = (opp_matches, json) => {
+	if (json.status !== "success")
+		return fetch_error(json.data);
+
+	const matches = json.data;
+	if (!(matches instanceof Array)) {
+		console.warn("Expected array of matches, got", matches);
+		return;
+	}
+
+	const match_nodes = matches.map((match) => {
+		const new_match_node = opponent_match_node.cloneNode(true);
+		new_match_node.href = `https://mcsrranked.com/stats/${total.nickname}/${match.id}?matches=ranked&sort=newest`
+
+		const time_str = time_to_string(match.result.time / 1000);
+		const time = new_match_node.querySelector(".match_time");
+		time.innerText = time_str;
+		time.classList.add(match.result.uuid === total.uuid ? "wins" : "losses");
+
+		const FORFEIT_URL = "./static/forfeit.png";
+		const COMPLETION_URL = "./static/completion.png";
+		const forfeit_img = new_match_node.querySelector(".match_forfeit");
+		forfeit_img.src = match.forfeited ? FORFEIT_URL : COMPLETION_URL;
+		forfeit_img.title = match.forfeited ? "forfeited" : "completed";
+
+		return new_match_node;
+	});
+	opp_matches.replaceChildren(...match_nodes);
 }

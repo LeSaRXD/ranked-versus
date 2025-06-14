@@ -6,6 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	</head>
 	<body>
+		<div id="content">
 		<header>
 			<img src="./static/ranked.png">
 			<span>MCSR Ranked Versus Lookup</span>
@@ -63,23 +64,34 @@
 
 		<div id="opponents">
 			<div class="opponent">
-				<a class="opponent_link" target="_blank"></a>
-				<img class="opponent_avatar" src="./static/loading.gif">
-				<a href="#" class="opponent_username">Loading...</a>
-				<div class="opponent_stats">
-					<span class="win_draw_loss">
-						<span class="wins text">W</span>/<span class="draws text">D</span>/<span class="losses text">L</span>: 
-						<span class="wins counter">0</span>/<span class="draws counter">0</span>/<span class="losses counter">0</span>
-					</span>
-					<span class="averages">
-						Avg: <span class="wins counter">0:00</span>/<span class="losses counter">0:00</span>
-					</span>
-					<span class="elo_change">0 ELO</span>
+				<div class="opponent_inner">
+					<img class="opponent_avatar" src="./static/loading.gif">
+					<a href="#" class="opponent_username">Loading...</a>
+					<div class="opponent_stats">
+						<span class="win_draw_loss">
+							<span class="wins text">W</span>/<span class="draws text">D</span>/<span class="losses text">L</span>: 
+							<span class="wins counter">0</span>/<span class="draws counter">0</span>/<span class="losses counter">0</span>
+						</span>
+						<span class="averages">
+							Avg: <span class="wins counter">0:00</span>/<span class="losses counter">0:00</span>
+						</span>
+						<span class="elo_change">0 ELO</span>
+					</div>
+
+					<a class="floating opponent_link" target="_blank"></a>
+					<div class="floating opponent_expand"></div>
+			</div>
+				<div class="opponent_matches" style="display: none;">
+					<a class="opponent_match" target="_blank">
+						<span class="match_time">--</span>
+						<img class="match_forfeit" src="./static/loading.gif">
+					</a>
 				</div>
 			</div>
 		</div>
 
 		<script src="./js/main.js"></script>
 		<script src="./js/search.js"></script>
+		</div>
 	</body>
 </html>

@@ -1,15 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 :root {
+	--max-body-width: 1100px;
+
 	--background: #0D1317;
+	--transparent-bg: rgba(255, 255, 255, 0.1);
 	--foreground: #FFE3DC;
 	--focus: #9AE19D;
-	--radius: 0.4rem;
 	--wins: #caf0c7;
 	--losses: #eba9be;
+
+	--radius: 0.4rem;
 	--gap: 0.5rem;
 	--padding: 0.25rem;
-	--transparent-bg: rgba(255, 255, 255, 0.1);
+	--icon-size: 1.5rem;
 }
 
 * {
@@ -24,6 +28,19 @@ body {
 	min-width: 150px;
 	min-height: 100vh;
 
+	display: flex;
+	justify-content: center;
+
+	margin: 0;
+	padding: auto;
+
+	background-color: var(--background);
+}
+
+#content {
+	width: 100%;
+	max-width: var(--max-body-width);
+
 	margin: 0;
 	padding: 1rem;
 	box-sizing: border-box;
@@ -32,8 +49,6 @@ body {
 	flex-direction: column;
 	align-items: stretch;
 	gap: var(--gap);
-
-	background-color: var(--background);
 }
 
 header {
@@ -161,7 +176,7 @@ form {
 	width: var(--icon-size);
 	height: var(--icon-size);
 
-	background-size: cover;
+	background-size: contain;
 }
 
 #sort_direction {
@@ -178,39 +193,25 @@ form {
 }
 
 #user,
-.opponent {
+.opponent_inner {
 	display: flex;
 	align-items: center;
-	gap: 1rem;
-
-	padding: var(--gap);
-	box-sizing: border-box;
+	gap: var(--gap);
+	position: relative;
 }
 
 .opponent {
-	position: relative;
-	background-color: var(--transparent-bg);
-	border-radius: var(--radius);
-}
+	min-width: fit-content;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--gap);
 
-.opponent_link {
-	position: absolute;
-	right: calc(2 * var(--padding));
-	top: calc(2 * var(--padding));
-
-	width: 1.5rem;
-	aspect-ratio: 1;
-
+	padding: calc(2 * var(--padding));
 	box-sizing: border-box;
-	padding: var(--padding);
-	border-radius: var(--radius);
-	background-color: var(--transparent-bg);
-	cursor: pointer;
 
-	background-image: url("../static/link.png");
-	background-size: cover;
-	background-origin: content-box;
-	background-repeat: no-repeat;
+	background-color: var(--transparent-bg);
+	border-radius: var(--radius);
 }
 
 #user_avatar,
@@ -230,13 +231,47 @@ form {
 	flex-grow: 1;
 
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
 	gap: var(--gap);
 }
 
 #user_stats>span,
 .opponent_stats>span {
 	text-align: center;
+}
+
+@media only screen and (max-width: 600px) {
+
+	#user,
+	.opponent_inner {
+		flex-direction: column;
+		min-width: 130px;
+	}
+
+	#username,
+	.opponent_username {
+		min-width: unset;
+		text-align: center;
+	}
+
+	#user_stats,
+	.opponent_stats {
+		display: flex;
+		flex-direction: column;
+		justify-content: stretch;
+	}
+}
+
+@media only screen and (max-width: 700px) {
+
+	#filter_wrapper,
+	#sort_wrapper {
+		flex-direction: column;
+	}
+
+	#sort_filter {
+		flex-direction: column;
+	}
 }
 
 #opponents {
@@ -254,33 +289,74 @@ form {
 	color: var(--losses);
 }
 
-@media only screen and (max-width: 600px) {
+.floating {
+	position: absolute;
+	right: 0;
 
-	#user,
-	.opponent {
-		flex-direction: column;
-		min-width: 130px;
-	}
+	width: var(--icon-size);
+	height: var(--icon-size);
 
-	#username,
-	.opponent_username {
-		min-width: unset;
-		text-align: center;
-	}
+	cursor: pointer;
 
-	#user_stats,
-	.opponent_stats {
-		display: flex;
-		flex-direction: column;
-		justify-content: stretch;
-	}
+	padding: var(--padding);
+	box-sizing: border-box;
+	background-color: var(--transparent-bg);
+	border-radius: var(--radius);
+}
 
-	#filter_wrapper,
-	#sort_wrapper {
-		flex-direction: column;
-	}
+.floating:before {
+	content: '';
 
-	#sort_filter {
-		flex-direction: column;
-	}
+	display: block;
+	width: 100%;
+	height: 100%;
+
+	background-size: contain;
+	background-origin: content-box;
+	background-repeat: no-repeat;
+}
+
+.opponent_link {
+	top: 0;
+}
+
+.opponent_link:before {
+	background-image: url("../static/link.png");
+}
+
+.opponent_expand {
+	bottom: 0;
+}
+
+.opponent_expand:before {
+	background-image: url("../static/arrow.png");
+	transition: transform 0.3s ease-in-out;
+	transform: rotate(-90deg);
+}
+
+.opponent_expand.expanded:before {
+	transform: rotate(0);
+}
+
+.opponent_matches {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(5rem, auto));
+	gap: var(--gap);
+}
+
+.opponent_match {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+
+	padding: var(--padding);
+	background-color: var(--transparent-bg);
+	border-radius: var(--radius);
+
+	text-decoration: none;
+}
+
+.match_forfeit {
+	width: var(--icon-size);
+	height: var(--icon-size);
 }
