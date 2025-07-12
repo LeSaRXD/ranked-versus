@@ -1,0 +1,4 @@
+exclude:
+  - "tsconfig.json"
+  - "package.json"
+  - "src/"
