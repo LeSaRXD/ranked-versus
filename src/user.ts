@@ -1,3 +1,5 @@
+import { ApiResponse, fetch_error, fetch_json, Match, Player, VsResult } from "./api.js";
+
 const MATCHES_PER_LOAD: number = 100;
 
 enum Filter {
@@ -17,20 +19,6 @@ namespace Filter {
 			"greater": Filter.GREATER,
 		}[value] ?? null;
 	}
-};
-interface VsResult {
-	total: number,
-	wins: number,
-	draws: number,
-	losses: number,
-	win_completions: number,
-	loss_completions: number,
-	win_completions_time: number,
-	loss_completions_time: number,
-	win_average: number | null,
-	loss_average: number | null,
-	elo_change: number,
-	opponent: Player,
 };
 type SortBy = [keyof VsResult, boolean];
 type FilterBy = [keyof VsResult, Filter, number];
@@ -101,38 +89,9 @@ window.addEventListener("load", () => {
 	fetch_player(username);
 });
 
-type Callback = (json: any) => any;
-const fetch_json = (url: string, callback: Callback) => {
-	fetch(url).then((res) => res.json().then(callback).catch(fetch_error)).catch(fetch_error);
-}
-
 const fetch_player = (user: string) => {
 	const user_url = `https://api.mcsrranked.com/users/${user}`;
 	fetch_json(user_url, parse_user);
-}
-
-const fetch_error = (err: string | null) => {
-	if (err === "User is not exists.") {
-		alert("User does not exist! Please try a different username");
-		window.location.assign("./index.html");
-		return;
-	}
-	alert("An error occurred! Check console for more info");
-	console.error(err);
-}
-
-type ApiResponse<T> = {
-	status: "error",
-	data: string | null,
-} | {
-	status: "success"
-	data: T | null,
-};
-
-interface Player {
-	uuid: string,
-	nickname: string,
-	eloRate: number | null,
 }
 
 const parse_user = (res: ApiResponse<any>) => {
@@ -196,20 +155,6 @@ const get_matches = () => {
 	fetch_json(matches_url, got_matches);
 	update_loading_status();
 }
-
-interface Match {
-	id: number,
-	forfeited: boolean,
-	players: Player[],
-	result: {
-		uuid: string,
-		time: number,
-	},
-	changes: {
-		uuid: string,
-		change: number,
-	}[]
-};
 
 const got_matches = (res: ApiResponse<Match[]>) => {
 	if (res.status === "error")
@@ -528,8 +473,6 @@ const load_url = (params: URLSearchParams) => {
 		const sort_direction = document.getElementById("sort_direction") as HTMLElement;
 		sort_direction.style.transform = val ? "" : "scale(1, -1)";
 	}
-
-	console.log("Loaded", total.filter_by[0], total.sort_by[0]);
 }
 
 const on_filter_change = () => {

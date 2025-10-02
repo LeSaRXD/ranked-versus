@@ -1,4 +1,4 @@
-"use strict";
+import { fetch_error, fetch_json } from "./api.js";
 const MATCHES_PER_LOAD = 100;
 var Filter;
 (function (Filter) {
@@ -20,7 +20,6 @@ var Filter;
         }[value]) !== null && _a !== void 0 ? _a : null;
     };
 })(Filter || (Filter = {}));
-;
 ;
 const total = {
     uuid: null,
@@ -67,21 +66,9 @@ window.addEventListener("load", () => {
     load_url(params);
     fetch_player(username);
 });
-const fetch_json = (url, callback) => {
-    fetch(url).then((res) => res.json().then(callback).catch(fetch_error)).catch(fetch_error);
-};
 const fetch_player = (user) => {
     const user_url = `https://api.mcsrranked.com/users/${user}`;
     fetch_json(user_url, parse_user);
-};
-const fetch_error = (err) => {
-    if (err === "User is not exists.") {
-        alert("User does not exist! Please try a different username");
-        window.location.assign("./index.html");
-        return;
-    }
-    alert("An error occurred! Check console for more info");
-    console.error(err);
 };
 const parse_user = (res) => {
     if (res.status === "error")
@@ -135,7 +122,6 @@ const get_matches = () => {
     fetch_json(matches_url, got_matches);
     update_loading_status();
 };
-;
 const got_matches = (res) => {
     if (res.status === "error")
         return fetch_error(res.data);
@@ -407,7 +393,6 @@ const load_url = (params) => {
         const sort_direction = document.getElementById("sort_direction");
         sort_direction.style.transform = val ? "" : "scale(1, -1)";
     }
-    console.log("Loaded", total.filter_by[0], total.sort_by[0]);
 };
 const on_filter_change = () => {
     var _a, _b, _c;
