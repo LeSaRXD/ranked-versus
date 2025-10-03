@@ -248,7 +248,7 @@ const display_opponents = () => {
         new_card_node.querySelector(".opponent_avatar").src = `https://mineskin.eu/helm/${result.opponent.uuid}`;
         const opp_name = new_card_node.querySelector(".opponent_username");
         opp_name.innerText = result.opponent.nickname;
-        opp_name.href = `./search.html?username=${result.opponent.nickname}`;
+        opp_name.href = `./user.html?username=${result.opponent.nickname}`;
         const win_draw_loss = new_card_node.querySelector(".win_draw_loss");
         win_draw_loss.querySelector(".wins.counter").innerText = result.wins.toString();
         win_draw_loss.querySelector(".draws.counter").innerText = result.draws.toString();
