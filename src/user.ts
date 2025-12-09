@@ -43,7 +43,7 @@ const total: {
 	loading: true,
 	num_loaded: 0,
 	before: null,
-	after: 0,
+	after: 1,
 	datas: {},
 	results: {},
 	sort_by: [
