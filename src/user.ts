@@ -129,9 +129,7 @@ const load_cache = () => {
 		return;
 	}
 
-	total.after = parseInt(localStorage.getItem(`after_${total.uuid}`) ?? "0");
-	if (isNaN(total.after))
-		total.after = 0;
+	total.after = parseInt(localStorage.getItem(`after_${total.uuid}`) ?? "1");
 	total.results = JSON.parse(localStorage.getItem(`results_${total.uuid}`) ?? "{}");
 	total.num_loaded = Object.values(total.results).reduce((partial, curr) => partial + curr.total, 0);
 }

@@ -99,9 +99,7 @@ const load_cache = () => {
         localStorage.setItem("version", CURRENT_VERSION);
         return;
     }
-    total.after = parseInt((_a = localStorage.getItem(`after_${total.uuid}`)) !== null && _a !== void 0 ? _a : "0");
-    if (isNaN(total.after))
-        total.after = 0;
+    total.after = parseInt((_a = localStorage.getItem(`after_${total.uuid}`)) !== null && _a !== void 0 ? _a : "1");
     total.results = JSON.parse((_b = localStorage.getItem(`results_${total.uuid}`)) !== null && _b !== void 0 ? _b : "{}");
     total.num_loaded = Object.values(total.results).reduce((partial, curr) => partial + curr.total, 0);
 };
