@@ -475,12 +475,17 @@ const on_opponent_expand_response = (opp_matches, json) => {
         const time_str = time_to_string(match.result.time / 1000);
         const time = new_match_node.querySelector(".match_time");
         time.innerText = time_str;
-        time.classList.add(match.result.uuid === total.uuid ? "wins" : "losses");
+        if (match.result.uuid === null)
+            time.classList.add("draws");
+        else if (match.result.uuid === total.uuid)
+            time.classList.add("wins");
+        else
+            time.classList.add("losses");
         const FORFEIT_URL = "./static/forfeit.png";
         const COMPLETION_URL = "./static/completion.png";
         const forfeit_img = new_match_node.querySelector(".match_forfeit");
         forfeit_img.src = match.forfeited ? FORFEIT_URL : COMPLETION_URL;
-        forfeit_img.title = match.forfeited ? "forfeited" : "completed";
+        forfeit_img.title = match.result.uuid === null ? "drew" : (match.forfeited ? "forfeited" : "completed");
         return new_match_node;
     });
     opp_matches.replaceChildren(...match_nodes);

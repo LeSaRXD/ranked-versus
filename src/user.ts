@@ -551,7 +551,7 @@ const on_opponent_expand_response = (opp_matches: HTMLElement, json: any) => {
 	if (json.status !== "success")
 		return fetch_error(json.data);
 
-	const matches = json.data;
+	const matches: Match[] = json.data;
 	if (!(matches instanceof Array)) {
 		console.warn("Expected array of matches, got", matches);
 		return;
@@ -570,13 +570,18 @@ const on_opponent_expand_response = (opp_matches: HTMLElement, json: any) => {
 		const time_str = time_to_string(match.result.time / 1000);
 		const time = new_match_node.querySelector(".match_time") as HTMLElement;
 		time.innerText = time_str;
-		time.classList.add(match.result.uuid === total.uuid ? "wins" : "losses");
+		if (match.result.uuid === null)
+			time.classList.add("draws");
+		else if (match.result.uuid === total.uuid)
+			time.classList.add("wins");
+		else
+			time.classList.add("losses");
 
 		const FORFEIT_URL = "./static/forfeit.png";
 		const COMPLETION_URL = "./static/completion.png";
 		const forfeit_img = new_match_node.querySelector(".match_forfeit") as HTMLImageElement;
 		forfeit_img.src = match.forfeited ? FORFEIT_URL : COMPLETION_URL;
-		forfeit_img.title = match.forfeited ? "forfeited" : "completed";
+		forfeit_img.title = match.result.uuid === null ? "drew" : (match.forfeited ? "forfeited" : "completed");
 
 		return new_match_node;
 	});
