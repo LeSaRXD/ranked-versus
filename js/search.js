@@ -19,4 +19,8 @@ const get_leaderboard = (lb) => {
         return option;
     });
     datalist.replaceChildren(...datalistOptions);
+    const search = document.getElementById("search");
+    search.disabled = false;
+    const search_season = document.getElementById("search_season");
+    search_season.value = lb.data.season.number.toString();
 };

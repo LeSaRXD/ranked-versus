@@ -12,10 +12,11 @@
 				MCSR Ranked Versus Lookup
 			</header>
 
-			<form action="./user.html" accept-charset="utf-8">
+			<form id="search_form" action="./user.html" accept-charset="utf-8">
 				Search player versus stats:
 				<input required name="username" placeholder="Player username" list="leaderboard">
-				<button type="submit">Search</button>
+				<input id="search_season" type="hidden">
+				<button id="search" disabled type="submit">Search</button>
 			</form>
 			<datalist id="leaderboard"></datalist>
 

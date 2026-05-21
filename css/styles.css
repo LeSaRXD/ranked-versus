@@ -78,6 +78,14 @@ button {
 	padding: var(--padding);
 }
 
+button {
+	cursor: pointer;
+}
+
+button:disabled {
+	background-color: color-mix(in srgb, var(--background), 20% #fff);
+}
+
 form {
 	display: flex;
 	flex-direction: column;

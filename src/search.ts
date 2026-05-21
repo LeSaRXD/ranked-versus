@@ -23,4 +23,10 @@ const get_leaderboard = (lb: ApiResponse<Leaderboard>) => {
 		return option;
 	});
 	datalist.replaceChildren(...datalistOptions);
+
+	const search = document.getElementById("search") as HTMLButtonElement;
+	search.disabled = false;
+
+	const search_season = document.getElementById("search_season") as HTMLInputElement;
+	search_season.value = lb.data.season.number.toString();
 }
