@@ -1,23 +1,14 @@
-import { ApiResponse, fetch_json, Leaderboard } from "./api.js";
+import { fetch_api, Leaderboard } from "./api.js";
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
 	const LEADERBOARD_URL = "https://api.mcsrranked.com/leaderboard";
-	fetch_json(LEADERBOARD_URL, get_leaderboard);
+	const leaderboard = await fetch_api<Leaderboard>(LEADERBOARD_URL, "Error getting leaderboard!");
+	load_lb_datalist(leaderboard);
 });
 
-const get_leaderboard = (lb: ApiResponse<Leaderboard>) => {
-	if (lb.status === "error") {
-		console.error("Error getting leaderboard!", lb.data);
-		return;
-	}
-
-	if (lb.data === null) {
-		console.warn("Response data is null!", lb.status);
-		return;
-	}
-
+const load_lb_datalist = (lb: Leaderboard) => {
 	const datalist = document.getElementById("leaderboard") as HTMLDataListElement;
-	const datalistOptions = lb.data.users.map((user) => {
+	const datalistOptions = lb.users.map((user) => {
 		const option = document.createElement("option");
 		option.value = user.nickname;
 		return option;
@@ -28,5 +19,5 @@ const get_leaderboard = (lb: ApiResponse<Leaderboard>) => {
 	search.disabled = false;
 
 	const search_season = document.getElementById("search_season") as HTMLInputElement;
-	search_season.value = lb.data.season.number.toString();
+	search_season.value = lb.season.number.toString();
 }

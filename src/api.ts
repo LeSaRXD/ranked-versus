@@ -1,10 +1,12 @@
-export type ApiResponse<T> = {
+type ApiError = {
 	status: "error",
 	data: string | null,
-} | {
+}
+type ApiSuccess<T> = {
 	status: "success"
-	data: T | null,
-};
+	data: T,
+}
+type ApiResponse<T> = ApiError | ApiSuccess<T>;
 
 export interface Player {
 	uuid: string,
@@ -47,17 +49,29 @@ export interface Leaderboard {
 	users: Player[],
 }
 
-export type Callback = (json: any) => any;
-export const fetch_json = (url: string, callback: Callback) => {
-	fetch(url).then((res) => res.json().then(callback).catch(fetch_error)).catch(fetch_error);
+export class JsonError {
+	readonly error: ApiError;
+	constructor(error: ApiError) {
+		this.error = error;
+	}
 }
 
-export const fetch_error = (err: string | null) => {
-	if (err === "User is not exists.") {
-		alert("User does not exist! Please try a different username");
-		window.location.assign("./index.html");
-		return;
+const USER_NOT_FOUND = "User is not exists.";
+export const fetch_api = async <T>(url: string, err_msg?: string | undefined): Promise<T> => {
+	try {
+		let res = await fetch(url);
+		let json: ApiResponse<T> = await res.json();
+		if (json.status === "error")
+			throw new JsonError(json);
+		return json.data;
+	} catch (err) {
+		if (err instanceof JsonError && err.error.data === USER_NOT_FOUND) {
+			alert("User does not exist! Please try a different username.");
+			window.location.assign("./index.html");
+			throw null;
+		}
+		alert(err_msg ?? "An error occurred! Check console for more info");
+		console.error(err);
+		throw err;
 	}
-	alert("An error occurred! Check console for more info");
-	console.error(err);
 }

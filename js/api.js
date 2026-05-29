@@ -1,14 +1,27 @@
 ;
 ;
-export const fetch_json = (url, callback) => {
-    fetch(url).then((res) => res.json().then(callback).catch(fetch_error)).catch(fetch_error);
-};
-export const fetch_error = (err) => {
-    if (err === "User is not exists.") {
-        alert("User does not exist! Please try a different username");
-        window.location.assign("./index.html");
-        return;
+export class JsonError {
+    constructor(error) {
+        this.error = error;
     }
-    alert("An error occurred! Check console for more info");
-    console.error(err);
+}
+const USER_NOT_FOUND = "User is not exists.";
+export const fetch_api = async (url, err_msg) => {
+    try {
+        let res = await fetch(url);
+        let json = await res.json();
+        if (json.status === "error")
+            throw new JsonError(json);
+        return json.data;
+    }
+    catch (err) {
+        if (err instanceof JsonError && err.error.data === USER_NOT_FOUND) {
+            alert("User does not exist! Please try a different username.");
+            window.location.assign("./index.html");
+            throw null;
+        }
+        alert(err_msg !== null && err_msg !== void 0 ? err_msg : "An error occurred! Check console for more info");
+        console.error(err);
+        throw err;
+    }
 };
