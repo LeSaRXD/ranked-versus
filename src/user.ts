@@ -56,15 +56,7 @@ window.addEventListener("load", async () => {
 		return;
 	}
 
-	const opponents = document.getElementById("opponents") as HTMLDivElement;
-	opponent_card_node = opponents.children[0] as HTMLDivElement;
-	opponents.replaceChildren();
-	opponent_card_node.style.display = "";
-
-	const opponent_matches = opponent_card_node.querySelector(".opponent_matches") as HTMLDivElement;
-	opponent_match_node = opponent_matches.children[0] as HTMLAnchorElement | undefined;
-	opponent_matches.replaceChildren();
-
+	init_elements();
 	document.getElementById("sort_select")?.addEventListener("change", on_sort_change);
 	document.getElementById("sort_direction")?.addEventListener("click", on_sort_direction_change);
 
@@ -73,11 +65,11 @@ window.addEventListener("load", async () => {
 	display_player(player);
 
 	const cache = load_cache(player.uuid);
-	const matches = await get_matches(player.uuid, cache);
-	const new_datas = matches_to_datas(player.uuid, matches.matches);
+	const new_matches = await get_matches(player.uuid, cache);
+	const new_datas = matches_to_datas(player.uuid, new_matches.matches);
 
 	const all_results = process_datas(player.uuid, cache?.results ?? {}, new_datas);
-	save_cache(player.uuid, all_results, matches.new_after);
+	save_cache(player.uuid, all_results, new_matches.new_after);
 	display_opponents(player, all_results);
 
 	const on_change = () => {
@@ -88,6 +80,17 @@ window.addEventListener("load", async () => {
 	document.getElementById("filter_select_cmp")?.addEventListener("change", on_change);
 	document.getElementById("filter_select_value")?.addEventListener("change", on_change);
 });
+
+const init_elements = () => {
+	const opponents = document.getElementById("opponents") as HTMLDivElement;
+	opponent_card_node = opponents.children[0] as HTMLDivElement;
+	opponents.replaceChildren();
+	opponent_card_node.style.display = "";
+
+	const opponent_matches = opponent_card_node.querySelector(".opponent_matches") as HTMLDivElement;
+	opponent_match_node = opponent_matches.children[0] as HTMLAnchorElement | undefined;
+	opponent_matches.replaceChildren();
+}
 
 const fetch_player = async (username: string): Promise<Player> => {
 	const user_url = `https://api.mcsrranked.com/users/${username}`;
@@ -173,9 +176,11 @@ const get_matches = async (uuid: string, cache: Cache | null): Promise<NewMatche
 		}
 	}
 
+	let new_after = Math.max(...total_matches.map((m) => m.id));
+	new_after = isFinite(new_after) ? new_after : after;
 	return {
 		matches: total_matches,
-		new_after: after,
+		new_after,
 	};
 }
 

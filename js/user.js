@@ -43,23 +43,17 @@ window.addEventListener("load", async () => {
         window.location.assign("./index.html");
         return;
     }
-    const opponents = document.getElementById("opponents");
-    opponent_card_node = opponents.children[0];
-    opponents.replaceChildren();
-    opponent_card_node.style.display = "";
-    const opponent_matches = opponent_card_node.querySelector(".opponent_matches");
-    opponent_match_node = opponent_matches.children[0];
-    opponent_matches.replaceChildren();
+    init_elements();
     (_a = document.getElementById("sort_select")) === null || _a === void 0 ? void 0 : _a.addEventListener("change", on_sort_change);
     (_b = document.getElementById("sort_direction")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", on_sort_direction_change);
     load_url(params);
     const player = await fetch_player(username);
     display_player(player);
     const cache = load_cache(player.uuid);
-    const matches = await get_matches(player.uuid, cache);
-    const new_datas = matches_to_datas(player.uuid, matches.matches);
+    const new_matches = await get_matches(player.uuid, cache);
+    const new_datas = matches_to_datas(player.uuid, new_matches.matches);
     const all_results = process_datas(player.uuid, (_c = cache === null || cache === void 0 ? void 0 : cache.results) !== null && _c !== void 0 ? _c : {}, new_datas);
-    save_cache(player.uuid, all_results, matches.new_after);
+    save_cache(player.uuid, all_results, new_matches.new_after);
     display_opponents(player, all_results);
     const on_change = () => {
         on_filter_change();
@@ -69,6 +63,15 @@ window.addEventListener("load", async () => {
     (_e = document.getElementById("filter_select_cmp")) === null || _e === void 0 ? void 0 : _e.addEventListener("change", on_change);
     (_f = document.getElementById("filter_select_value")) === null || _f === void 0 ? void 0 : _f.addEventListener("change", on_change);
 });
+const init_elements = () => {
+    const opponents = document.getElementById("opponents");
+    opponent_card_node = opponents.children[0];
+    opponents.replaceChildren();
+    opponent_card_node.style.display = "";
+    const opponent_matches = opponent_card_node.querySelector(".opponent_matches");
+    opponent_match_node = opponent_matches.children[0];
+    opponent_matches.replaceChildren();
+};
 const fetch_player = async (username) => {
     const user_url = `https://api.mcsrranked.com/users/${username}`;
     return await fetch_api(user_url, `Could not find user ${username}`);
@@ -136,9 +139,11 @@ const get_matches = async (uuid, cache) => {
             break;
         }
     }
+    let new_after = Math.max(...total_matches.map((m) => m.id));
+    new_after = isFinite(new_after) ? new_after : after;
     return {
         matches: total_matches,
-        new_after: after,
+        new_after,
     };
 };
 const matches_to_datas = (uuid, new_matches) => {
